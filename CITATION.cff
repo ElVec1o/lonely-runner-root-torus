@@ -22,6 +22,14 @@ authors:
     given-names: Vico
 license: CC-BY-4.0
 version: 1.0.0
+doi: 10.5281/zenodo.24357912
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.24357912
+    description: "Version 1.0.0 (Zenodo)"
+  - type: doi
+    value: 10.5281/zenodo.24357911
+    description: "All versions (Zenodo concept DOI)"
 repository-code: "https://github.com/ElVec1o/lonely-runner-root-torus"
 type: software
 date-released: 2026-11-19

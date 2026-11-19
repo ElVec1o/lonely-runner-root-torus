@@ -1,6 +1,7 @@
 # Critical two-dimensional subtori of the torus: root systems, repeat lines, and torsion points
 
 Repository: https://github.com/ElVec1o/lonely-runner-root-torus
+DOI: https://doi.org/10.5281/zenodo.24357912 (version 1.0.0); all versions: https://doi.org/10.5281/zenodo.24357911
 Version 1.0.0 (November 2026). Author: Vico Bonfioli. License: CC-BY-4.0 (`LICENSE.md`).
 Note: `paper/main.pdf` (19 pages; source `paper/main.tex`). Not peer reviewed.
 
