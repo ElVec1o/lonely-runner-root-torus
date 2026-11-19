@@ -1,0 +1,502 @@
+\documentclass[11pt]{amsart}
+\usepackage[margin=1.15in]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{example}[theorem]{Example}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\T}{\mathbb{T}}
+\newcommand{\dist}[1]{\lVert #1\rVert}
+\newcommand{\ML}{\mathrm{ML}}
+\newcommand{\lean}[1]{\texttt{#1}}
+\newcommand{\cont}{\operatorname{cont}}
+
+\emergencystretch=2em
+\title[Critical two-dimensional subtori]{Critical two-dimensional subtori of the torus: root systems, repeat lines, and torsion points}
+\author{Vico Bonfioli}
+\date{November 2026}
+
+\begin{document}
+
+\begin{abstract}
+For integer linear forms $\ell_1,\dots,\ell_n$ in two variables, let $M$ be the supremum over the plane of $\min_r\dist{\ell_r(s,t)}$: the largest distance from the coordinate walls reached by the corresponding two-dimensional subtorus of $\T^n$. We prove four statements and verify each in Lean~4; the formal statements are slightly weaker in places, which Section~\ref{sec:lean} lists. (1) The coefficient lists of the positive roots of $A_2,B_2,G_2$ have $M=1/3,1/4,1/6$, that is $1/h$ for the Coxeter number $h$ and the number $n=h$ of forms; the tori $U^2$ of Jain and Kravitz and $U_C$ of Cordella are the tori of $B_2$ and $G_2$. The upper bound is a finite case check ($2$, $6$ and $120$ cases) closed by the Lean kernel. (2) If $n$ forms are pairwise distinct up to sign and fall into $d\ge2$ proportionality classes, then at least $2n-d$ lines of the plane carry two coordinates that agree up to sign while no coordinate vanishes. (3) A condition on the absolute values of the coordinates of an integer vector in the plane forces $\varphi(N)=2$ for Euler's function. (4) If every form has content coprime to $N$ and $n$ is smaller than the number of points of the projective line over $\Z/N$, then $M\ge1/N$; consequently, for every $n\ge5$ with $n\ne6$, a list of $n$ forms with coprime entries has $M>1/n$, and $M=1/n$ for a list with coprime entries forces $n\in\{2,3,4,6\}$ (the case $n=1$ is excluded because one form has $M=1/2$). One conjecture, supported by exact computation in bounded boxes and not proved, is stated at the end.
+\end{abstract}
+
+\maketitle
+
+\section{Introduction}\label{sec:intro}
+
+\subsection{Setting}
+Write $\dist{x}$ for the distance from $x\in\R$ to the nearest integer. For integers $v_1,\dots,v_k$ put $\ML(v)=\sup_{t\in\R}\min_i\dist{v_it}$. The Lonely Runner Conjecture of Wills and Cusick \cite{Wills,Cusick} asserts $\ML(v)\ge 1/(k+1)$ for $k$ distinct positive integers. Kravitz \cite{Kravitz}, Fan and Sun \cite{FS}, Giri and Kravitz \cite{GK}, Jain and Kravitz \cite{JK} and Cordella \cite{Cordella} study the values of $\ML$ below $1/k$. In that study subtori of $\T^n=(\R/\Z)^n$ enter; the critical two-dimensional tori with four and with six forms are called $U^2$ in \cite{JK} and $U_C$ in \cite{Cordella}, and the case of five forms is treated in \cite{Cordella,YGB}.
+
+A \emph{form} is a vector $\ell=(a,b)\in\Z^2$, acting by $\ell(s,t)=as+bt$. For a list $\mathcal F=(\ell_1,\dots,\ell_n)$ of forms put
+\[
+f_{\mathcal F}(s,t)=\min_{1\le r\le n}\dist{\ell_r(s,t)},\qquad M(\mathcal F)=\sup_{(s,t)\in\R^2} f_{\mathcal F}(s,t).
+\]
+This is the maximal distance from the coordinate walls of the two-dimensional subtorus of $\T^n$ with coordinate forms $\ell_r$. If all second entries vanish then $M(\mathcal F)=\ML(a_1,\dots,a_n)$. Here $n$ counts forms, so a one-dimensional torus with $n$ speeds has $n+1$ runners. We call $\mathcal F$ \emph{critical} if $M(\mathcal F)=1/n$, the word used for such subtori in \cite{Cordella,YGB}; the next paragraph says why this value matters.
+
+\paragraph{Why $1/n$, and why critical.} Let $W=(w_1,\dots,w_{n-1})$ be distinct positive integers and take the forms $(w_i,0)$ and $(0,1)$; this is the product $W\times S^1$. Since $\ML(W)\le1/2$, one has $M=\ML(W)$ for this list. The Lonely Runner Conjecture for the $n-1$ speeds $W$ (that is, for $n$ runners) is therefore the statement $M\ge1/n$ for the product, so $1/n$ is the value predicted by the conjecture, with the shift $n=k+1$ for $k=n-1$ speeds, and a product with $M<1/n$ would be a counterexample to it. A product is critical exactly when $W$ attains the predicted bound, as $W=(1,2,3,4)$ does with $\ML(W)=1/5$ (Remark~\ref{rem:necessity}). For lists that are not products we make no claim that $M\ge1/n$; Corollary~\ref{cor:prim}(i) proves $M>1/n$ for primitive lists with $n\ge5$, $n\ne6$. The critical tori that are not products are the ones of interest here: they are the tori of this kind that reach the same value $1/n$, and the root tori of Theorem~\ref{thm:root} are examples. Nothing below uses the conjecture.
+
+\subsection{Results}
+Let $\mathcal F_{A_2}=((1,0),(0,1),(1,1))$, $\mathcal F_{B_2}=((1,0),(0,1),(1,1),(1,2))$ and $\mathcal F_{G_2}=((1,0),(0,1),(1,1),(2,1),(3,1),(3,2))$. These are the coefficient vectors of the positive roots of $A_2,B_2,G_2$ in the basis of simple roots (Section~\ref{sec:root}); the number of forms is the Coxeter number $h=3,4,6$.
+
+\begin{theorem}[Root tori]\label{thm:root}
+$M(\mathcal F_{A_2})=1/3$, $M(\mathcal F_{B_2})=1/4$, $M(\mathcal F_{G_2})=1/6$, each attained at $(s,t)=(1/h,1/h)$. The torus $U^2$ of Jain and Kravitz has the same set of forms as $\mathcal F_{B_2}$ (the lists differ by a permutation of coordinates), and the torus $U_C$ of Cordella has literally the form list $\mathcal F_{G_2}$. The upper bound $M\le1/h$ is a finite case check: the plane is cut into $2$, $6$ and $120$ cells, the products of the ranges $2$; $2\cdot3$; $2\cdot3\cdot4\cdot5$ (Section~\ref{sec:root}), and each cell is refuted by linear arithmetic.
+\end{theorem}
+
+\begin{theorem}[Repeat lines]\label{thm:count}
+Let $\ell_1,\dots,\ell_n$ be nonzero forms with $\ell_p\ne\pm\ell_q$ for $p\ne q$, forming $d\ge2$ proportionality classes. Call a line $\ker(\ell_p\pm\ell_q)$ with $p\ne q$ a \emph{repeat line}, and a repeat line \emph{free} if it equals no $\ker\ell_r$. Then the number $L$ of free repeat lines satisfies $2n\le L+d$. The bound is attained by $\mathcal F_{A_2}$, where $n=d=L=3$.
+\end{theorem}
+
+\begin{theorem}[A totient condition]\label{thm:cryst}
+Let $N\ge3$ and let $w\in\Z^n$ lie in the real span of the two columns of the form matrix, with $0<|w_r|<N$ for all $r$. Suppose that every height $1,\dots,N-1$ occurs exactly once among $|w_1|,\dots,|w_n|$ except one height $\kappa$, which occurs twice; that no two forms are proportional; and that $f_{\mathcal F}\le 1/N$ everywhere. Then $\varphi(N)=2$ and $\kappa\in\{1,N-1\}$. Moreover, for $N\ge3$, $\varphi(N)=2$ if and only if $N\in\{3,4,6\}$.
+\end{theorem}
+
+\paragraph{Why Theorem~\ref{thm:cryst}, and what it adds to Corollary~\ref{cor:prim}(v).}
+Whether the entries of a form list are coprime depends on the integer basis chosen for the plane, not only on the torus: $\mathcal F_{G_2}$ written in a basis of index $3$ has contents $(1,1,1,3,3,3)$ (Section~\ref{sec:prelim}). Theorem~\ref{thm:psi} and Corollary~\ref{cor:prim} need coprime entries in the basis given and say nothing about such a presentation. The hypotheses of Theorem~\ref{thm:cryst} (a vector $w$ in the real span of the columns, non-proportional forms, $f_{\mathcal F}\le1/N$) do not change with the basis, so the theorem applies to every presentation of a torus that satisfies them. That is what it adds beyond Corollary~\ref{cor:prim}(v), whose conclusion $\varphi(n)=2$ it shares. It is weak: it needs a vector $w$ with a rigid height pattern, and (v) assumes less when the entries are coprime. It is the only totient statement of this note without a coprimality hypothesis, and it is formalised; that is why it is kept.
+
+The \emph{content} of a form $(a,b)$ is $\cont(\ell)=\gcd(a,b)$. A list is \emph{primitive} if every form has content $1$ in the given coordinates. For $N\ge1$ call a vector $x=(x_1,x_2)\in\Z^2$ \emph{unimodular mod $N$} if $\gcd(x_1,x_2,N)=1$. Let $R_N$ be the set of vectors $x\in\{0,\dots,N-1\}^2$, unimodular mod $N$, such that no unimodular $x'\in\{0,\dots,N-1\}^2$ that precedes $x$ in the lexicographic order satisfies $N\mid x_1'x_2-x_1x_2'$. Section~\ref{sec:psi} shows that this relation between unimodular vectors is an equivalence, that $R_N$ has one element in each class, and that the classes are the points of the projective line $\mathbb P^1(\Z/N)$, so $|R_N|=\psi(N)=N\prod_{p\mid N}(1+1/p)$, the Dedekind function.
+
+\begin{theorem}[Torsion points]\label{thm:psi}
+Let $N\ge1$ and let every form of $\mathcal F$ have content coprime to $N$. (a) If $n<2N-\varphi(N)$ then $M(\mathcal F)\ge 1/N$. (b) If $n<|R_N|$ then $M(\mathcal F)\ge 1/N$. The equality $|R_N|=\psi(N)$ is proved by hand in Section~\ref{sec:psi} and its numerical instances $N\le12$ and $N\in\{18,24,30\}$ are kernel-checked. Of Corollary~\ref{cor:prim}, parts (iii) and (iv) use these checked cardinalities through (b); part (i) uses only (a) and the arithmetic statement of Lean's \lean{exists\_level} (a level $N<n$ with $n<2N-\varphi(N)$), with no cardinality; part (v) and the restriction $n\in\{2,3,4,6\}$ in (ii) follow from (i), and the existence in (ii) is Theorem~\ref{thm:root}.
+\end{theorem}
+
+\begin{corollary}\label{cor:prim}
+Let $\mathcal F$ be primitive with $n$ forms. (i) If $n\ge5$ and $n\ne6$ then $M(\mathcal F)>1/n$. (ii) If $M(\mathcal F)=1/n$ then $n\in\{2,3,4,6\}$; the lists $\mathcal F_{A_2},\mathcal F_{B_2},\mathcal F_{G_2}$ show that $3,4,6$ occur, and $n=2$ occurs for $((1,0),(0,1))$. (iii) If $n\le11$ then $M(\mathcal F)\ge1/6$. (iv) If $12\le n\le71$ then $M(\mathcal F)\ge 1/10,\,1/12,\,1/18,\,1/24,\,1/30$ for $n$ in the ranges $12$--$17$, $18$--$23$, $24$--$35$, $36$--$47$, $48$--$71$ respectively. (v) If $n\ge3$ and $f_{\mathcal F}\le1/n$ everywhere then $\varphi(n)=2$.
+\end{corollary}
+
+The restriction to primitive lists is necessary (Remark~\ref{rem:necessity}). Sections~\ref{sec:root}--\ref{sec:psi} are verified in Lean~4 (Section~\ref{sec:lean}), apart from the hand-written parts that Section~\ref{sec:lean} lists; Section~\ref{sec:conj} states one conjecture, which is not proved.
+
+\subsection{Where the idea is}
+A two-dimensional torus is a plane wound around a cube, and $M$ is how far the plane gets from all faces. Two devices bound $M$ from below. Adding or subtracting two forms gives a line in the plane on which two coordinates agree up to sign, so the problem on that line has fewer speeds; counting such lines is Theorem~\ref{thm:count}. Alternatively, sample the plane at the points of order $N$: a form with content coprime to $N$ vanishes at exactly one cyclic subgroup of order $N$, and when there are more cyclic subgroups than forms some point survives, at distance at least $1/N$ from every face (Theorem~\ref{thm:psi}). The lists for which $1/n$ is reached are those with no level $N<n$ that has room; for $n=3,4,6$ they are the root tori (Theorem~\ref{thm:root}), whose value $1/h$ is checked exactly by cutting the plane into finitely many cells and refuting each one.
+
+\subsection{What is new, and what is not}
+The claims below are stated as strongly as the sources we read support. A reader should treat Theorems~\ref{thm:root}, \ref{thm:count} and \ref{thm:cryst} as formal restatements plus a dictionary, and Theorem~\ref{thm:psi} as an elementary remark. Theorem numbers of \cite{Cordella} and \cite{YGB} refer to arXiv version~2 of the former and version~1 of the latter.
+\begin{itemize}[leftmargin=1.5em]
+\item \emph{Theorem~\ref{thm:root}.} The torus $U^2$ occurs in \cite{JK} (classification of the two-dimensional tori with $D=1/4$, Section~3.3 there), and Yi, Gill and Bu write it as $\{(X,Y,X+Y,X+2Y)\}$, which is $\mathcal F_{B_2}$ in the order used here, and prove $\ML(U^2)=1/4$ in Lemma~8.3 of \cite{YGB} by the same six floor cells as below. The value $1/6$ of $U_C$ is Theorem~3.7 of \cite{Cordella}, proved there by an exact decision procedure, and $U_C$ is the torus $U^7$ of \cite[Section~6]{JK}. The value $1/3$ of $\mathcal F_{A_2}$ is the equality $\ML(W^2)=1/3$ in the proof of Lemma~9.4 of \cite{YGB}. To the best of our reading, those sources do not state the root-system reading or the uniform value $1/h$. What is added is the dictionary and its kernel-checked values.
+\item \emph{Theorem~\ref{thm:count}.} Lemma~3.4 of Cordella \cite{Cordella}, in his setting of five and six forms, gives at least $2\max(m_k,m_l)-(d-2)$ free repeat lines for any two classes of sizes $m_k,m_l$; Theorem~\ref{thm:count} implies this count (Section~\ref{sec:count}). The construction of one free repeat line by adding two consecutive rays of forms is Lemma~11.2 of Yi, Gill and Bu \cite{YGB}; it gives one such line, not a count. Not in either source, as far as we read, is the sharp count $2n-d$ for every $n$, the sumset step in an ordered group, and the formal proof. The terms ``repeat line'' and ``free'' are Cordella's (Section~3 of \cite{Cordella}).
+\item \emph{Theorem~\ref{thm:cryst}.} Not found in the literature we read. It is weak; the paragraph after its statement in Section~\ref{sec:intro} says why it is kept and what it adds to Corollary~\ref{cor:prim}(v).
+\item \emph{Theorem~\ref{thm:psi}, Corollary~\ref{cor:prim}.} Not found in the lonely-runner literature we read. Theorem~\ref{thm:psi} is the two-dimensional form of the standard one-dimensional argument (if $N$ is coprime to every speed, the time $1/N$ keeps every runner at distance at least $1/N$). Its hypothesis excludes every torus of interest to the conjecture, since products $W\times S^1$ and the Kravitz families are not primitive. The result explains why primitive critical tori occur only at $n\in\{2,3,4,6\}$ and gives no information on the Lonely Runner Conjecture.
+\item \emph{Conjecture~\ref{conj:gap}.} Ours; supported by computation of limited reach (Section~\ref{sec:conj}), not proved. For five forms the tori of $\T^5$ with $D(U)=3/10$ are classified in Theorem~3.8 of \cite{Cordella} (two products, by an exact decision procedure), and the tori of $\T^5$ with $M<2/9$ in Theorem~11.5 of \cite{YGB}; the case of $\mathcal F_{A_2}$ plus one form is Lemma~9.4(iii) and Theorem~9.6 of \cite{YGB}.
+\item Nothing here bears on the Lonely Runner Conjecture itself.
+\end{itemize}
+
+\subsection{Provenance and what has been checked}
+The Lean modules, the proofs and the first draft of this note were produced by an AI system (Claude, Anthropic); the written proofs were re-derived by a second instance of the system, and the Lean statements were read against the text by a third. The questions, the research directions and the decision to formalize these statements came from Vico Bonfioli. Here ``checked'' means accepted by the Lean kernel (Section~\ref{sec:lean}); no human referee has checked the proofs or the text.
+
+\paragraph{What this note contains, and what it does not.}
+It contains four theorems and one corollary, each with a Lean statement listed in Section~\ref{sec:lean}, and written proofs of them, which are independent of the Lean proofs; the Lean proofs are the ones that carry the claim. It also contains a few hand-written passages that are not Lean statements and that Section~\ref{sec:lean} lists: the worked examples and the cell tables of Sections~\ref{sec:prelim} and~\ref{sec:root}, the equivalence property and the count $|R_N|=\psi(N)$ for general $N$ (Lemma~\ref{lem:classes}), the hand proof of $\ML(1,2,3,4)=1/5$ (Remark~\ref{rem:necessity}), and the one-line consequence of Corollary~\ref{cor:prim}(i) in Remark~\ref{rem:primconj}. Section~\ref{sec:conj} contains a conjecture and computations that are exact-integer programs; neither is proved or formalised. It does not contain any argument that explains the value $1/h$ by root-system theory, any statement about tori of dimension at least three, any statement that depends on the Lonely Runner Conjecture for fewer speeds, or any consequence for the Lonely Runner Conjecture itself. Further statements that we proved by hand and did not formalise are not included.
+
+\paragraph{Contents.} Section~\ref{sec:outline} gives the proofs at one level of zoom. Section~\ref{sec:prelim} fixes notation and vocabulary and works the smallest case by hand. Sections~\ref{sec:root}, \ref{sec:count}, \ref{sec:cryst} and \ref{sec:psi} prove Theorems~\ref{thm:root}--\ref{thm:psi} and Corollary~\ref{cor:prim}. Section~\ref{sec:conj} states the conjecture and the ground covered by computation. Section~\ref{sec:lean} maps the statements to Lean declarations and lists what is not formalised.
+
+\section{Outline of the proof}\label{sec:outline}
+
+This section states the proof of each theorem in a few steps, with the lemma that carries each step and the reason it suffices. The four theorems are independent of one another; the only dependency is that Corollary~\ref{cor:prim}(ii) uses Theorem~\ref{thm:root} for existence at $n=3,4,6$ and Theorem~\ref{thm:psi} for the rest. Nothing in later sections is needed to read this one. Every statement below is checked by the Lean kernel; the kernel also accepts the only computations in the note, namely finite case analyses and the counts $|R_N|$ for the listed $N$. The identity $|R_N|=\psi(N)$ for general $N$ is a classical count proved by hand in Section~\ref{sec:psi}, and nothing in the Lean proofs depends on it.
+
+\medskip
+\noindent\textbf{Theorem~\ref{thm:root} (root tori).}
+\begin{enumerate}[leftmargin=2em,label=(R\arabic*)]
+\item Reduce $s,t$ to $[0,1)$ by integer shifts (these do not change $\dist{\cdot}$). \emph{Suffices:} $f_{\mathcal F}$ is $\Z^2$-periodic.
+\item Exhibit $(1/h,1/h)$: every coefficient sum lies in $[1,h-1]$ and one form has sum $1$, so all distances are at least $1/h$ and one equals $1/h$. \emph{Suffices:} gives $M\ge1/h$ and attainment.
+\item Upper bound: if all distances exceed $c$, each form value $z$ with $0\le z<N$ lies in a floor cell $(j+c,j+1-c)$, $0\le j<N$. The forms $s$, $t$ have range $N=1$, the remaining forms have ranges $2$; $2,3$; $2,3,4,5$ for $A_2,B_2,G_2$, so there are $2$, $6$, $120$ cells (the products $2$; $2\cdot3$; $2\cdot3\cdot4\cdot5$), and linear arithmetic refutes each when $c=1/h$. \emph{Suffices:} $f\le1/h$ everywhere. For $A_2$ and $B_2$ the cells can be checked by hand (Section~\ref{sec:root}); $G_2$ is left to the kernel.
+\end{enumerate}
+
+\noindent\textbf{Theorem~\ref{thm:count} (repeat lines).}
+\begin{enumerate}[leftmargin=2em,label=(C\arabic*)]
+\item Normalise: choose a direction on which no form vanishes, change basis and signs so that all first entries are positive. \emph{Suffices:} repeat lines and classes are unchanged.
+\item For adjacent classes (ordered by slope) the sum of one form from each lies strictly between them, so its line is free; for the pair (last, first) the difference lies outside the slope interval. \emph{Suffices:} each adjacent pair yields free lines, in disjoint arcs of slopes.
+\item Within an adjacent pair, lines correspond to ratios of coefficients, and the set of ratios has at least $m_k+m_l-1$ elements (Lemma~\ref{lem:ordered}). \emph{Suffices:} summing over the $d$ cyclically adjacent pairs gives $2n-d$.
+\end{enumerate}
+
+\noindent\textbf{Theorem~\ref{thm:cryst} (totient condition).}
+\begin{enumerate}[leftmargin=2em,label=(T\arabic*)]
+\item Lemma~\ref{lem:pair}: if two heights $u$ and $N-u$ with $u$ a unit occur once each, the two forms at those coordinates are proportional, else a small step from a torsion point beats $1/N$. \emph{Suffices:} contradicts non-proportionality.
+\item Hence every unit height is $\kappa$ or $N-\kappa$; the units $1$ and $N-1$ are present, so there are exactly two units. \emph{Suffices:} $\varphi(N)=2$, $\kappa\in\{1,N-1\}$.
+\item The equivalence with $N\in\{3,4,6\}$ follows by exhibiting a unit strictly between $1$ and $N-1$ for every other $N\ge3$.
+\end{enumerate}
+
+\noindent\textbf{Theorem~\ref{thm:psi} and Corollary~\ref{cor:prim} (torsion points).}
+\begin{enumerate}[leftmargin=2em,label=(P\arabic*)]
+\item Lemma~\ref{lem:det}: a form of content coprime to $N$ that vanishes mod $N$ at two vectors forces $N$ to divide their determinant. \emph{Suffices:} each form kills at most one class of vectors.
+\item Proposition~\ref{prop:pigeon}: more vectors with pairwise non-divisible determinants than forms leaves one vector $x$ killed by no form; at $x/N$ every distance is at least $1/N$. \emph{Suffices:} $M\ge1/N$.
+\item Two explicit families of vectors, of sizes $2N-\varphi(N)$ and $|R_N|$, give Theorem~\ref{thm:psi}. For primitive lists, choosing $N<n$ with $2N-\varphi(N)>n$ gives Corollary~\ref{cor:prim}(i) with no cardinality; (iii) and (iv) are arithmetic on the checked cardinalities $|R_N|$, and (ii), (v) follow from (i) and Theorem~\ref{thm:root}.
+\end{enumerate}
+
+\medskip
+\noindent\emph{Where the weight lies.} Steps (R3) and the counts $|R_N|$ are the computational parts; Lemma~\ref{lem:ordered} and Lemma~\ref{lem:pair} are the two places where an idea (order preservation, a perturbation off a torsion point) is needed.
+
+\section{Notation, vocabulary and the smallest case}\label{sec:prelim}
+
+This section fixes the symbols and terms used from Section~\ref{sec:root} on, and works the smallest nontrivial case ($n=3$) by hand so that the theorems can be seen to act before they are proved. It depends on nothing earlier; all later sections use it.
+
+\subsection{Notation}
+\begin{center}
+\small
+\begin{tabular}{@{}p{3.4cm}p{9cm}@{}}
+\toprule
+Symbol & Meaning\\
+\midrule
+$\dist{x}$ & distance from $x\in\R$ to the nearest integer\\
+$\ML(v)$ & $\sup_t\min_i\dist{v_it}$ for integers $v_1,\dots,v_k$ (loneliness of speeds)\\
+$\ell=(a,b)$, $\ell_r$ & integer form $\ell(s,t)=as+bt$; the $r$-th form of a list\\
+$\mathcal F=(\ell_1,\dots,\ell_n)$ & list of $n$ forms; $n$ counts forms, so a one-dimensional torus with $n$ speeds has $n+1$ runners\\
+$f_{\mathcal F}$, $M(\mathcal F)$ & $\min_r\dist{\ell_r}$ and its supremum over $\R^2$ (Lean: \lean{torusGap}, \lean{torusML})\\
+$d$, $m_k$ & number of proportionality classes of $\mathcal F$; size of the $k$-th class\\
+$L$ & number of free repeat lines (Theorem~\ref{thm:count})\\
+$\cont(\ell)$ & $\gcd(a,b)$, the content of $\ell$\\
+$\mathcal F_{A_2},\mathcal F_{B_2},\mathcal F_{G_2}$ & the three lists of Section~\ref{sec:intro}; $h=3,4,6$ is their length\\
+$\Delta,\ \alpha_1,\alpha_2,\ \theta$ & irreducible root system of rank $2$, its simple roots, its highest root (Section~\ref{sec:root} only)\\
+$N$ & level: the modulus of a torsion argument\\
+$\varphi(N)$, $\psi(N)$ & Euler's function and the Dedekind function $N\prod_{p\mid N}(1+1/p)$\\
+$R_N$ & the set of representatives of $\mathbb P^1(\Z/N)$ defined before Theorem~\ref{thm:psi}\\
+$S_N$ & explicit set of $2N-\varphi(N)$ vectors (Section~\ref{sec:psi})\\
+$\sigma_k,\ e_k,\ \mu_p$ & slope of the $k$-th class; primitive vector of that class; positive coefficient with $\ell_p=\mu_pe_k$ (Section~\ref{sec:count})\\
+$w,\ u,\ \kappa$ & integer vector, a unit height, the repeated height (Section~\ref{sec:cryst})\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Vocabulary}
+\begin{center}
+\small
+\begin{tabular}{@{}p{2.9cm}p{9.4cm}@{}}
+\toprule
+Term & Meaning, and its relation to the standard notion\\
+\midrule
+class & a set of pairwise proportional forms; standard (proportionality class)\\
+critical & $M(\mathcal F)=1/n$; the word is used for such subtori in \cite{Cordella,YGB}\\
+root torus & the torus of $\mathcal F_{A_2}$, $\mathcal F_{B_2}$ or $\mathcal F_{G_2}$; we call this a root torus because its forms are the positive roots; the closest standard notion is the torus of a root lattice in the plane, and the difference is only that we give the forms as coefficient vectors\\
+primitive list & all forms have content $1$ in the given coordinates; not a property of the torus (see below)\\
+repeat line, free & line $\ker(\ell_p\pm\ell_q)$; free if it equals no $\ker\ell_r$. The terms and the definition are those of \cite[Section~3]{Cordella}: on a repeat line two coordinates agree up to sign, and freeness says that a one-dimensional torus on that line has all coordinates nonzero, so that it is a genuine speed vector\\
+kill, level & a form $\ell$ kills $x\in\Z^2$ mod $N$ if $N\mid\ell(x)$; $N$ is called the level\\
+unimodular mod $N$ & $\gcd(x_1,x_2,N)=1$; standard for vectors in $(\Z/N)^2$ of order $N$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\emph{Primitive is not intrinsic.} The same torus written in a basis of a sublattice of index $3$ can have contents $(1,1,1,3,3,3)$ in place of $(1,\dots,1)$ (this is $\mathcal F_{G_2}$ composed with an integer matrix of determinant $3$). For instance, $P=\mathrm{diag}(1,3)$ sends a form $(a,b)$ to $(a,3b)$; then $(0,1),(3,1),(3,2)$ become $(0,3),(3,3),(3,6)$, which have content $3$, and $(1,0),(1,1),(2,1)$ become $(1,0),(1,3),(2,3)$, which have content $1$. The forms of content $3$ are the three whose coefficient vectors are multiples of $(0,1)$ modulo $3$, the line that $P$ kills mod $3$. As a hypothesis of a lower bound, primitivity of the given coordinates is a sufficient condition and is safe; in statements we say ``the forms have coprime entries'' and not ``the torus is primitive''. Replacing the basis by $P\in M_2(\Z)$ with $\det P\ne0$ replaces each form $\ell$ by $\ell\circ P$; the real span of the columns of the form matrix, the non-proportionality of the forms and $\sup f_{\mathcal F}$ are unchanged, so the hypotheses of Theorem~\ref{thm:cryst} hold in one basis exactly when they hold in the other (this remark is not a Lean statement). For instance $w=(1,1,2,3,4,5)$ lies in the span of the columns of $\mathcal F_{G_2}$, and the same $w$ serves for the index-$3$ presentation, whose contents $1,1,1,3,3,3$ are not coprime to $N=6$.
+
+For a list $\mathcal F$ the classes are the proportionality classes of its forms. A repeat line is well defined as a line only when $\ell_p\pm\ell_q\ne0$, which the hypothesis $\ell_p\ne\pm\ell_q$ of Theorem~\ref{thm:count} gives. A line and the proportionality class of a nonzero defining form are used interchangeably (in Lean a line is represented by the slope $b/a$ of its form, or by $\infty$; two nonzero forms have the same slope exactly when their $2\times2$ determinant vanishes).
+
+\begin{example}[$n=3$, by hand]\label{ex:A2}
+Let $\mathcal F=((1,0),(0,1),(1,1))$, so $f(s,t)=\min(\dist s,\dist t,\dist{s+t})$.
+
+\emph{Theorem~\ref{thm:root}.} At $(1/3,1/3)$ the three distances are $1/3,1/3,1/3$, so $M\ge1/3$. Conversely suppose $s,t\in[0,1)$ with $\dist s,\dist t>1/3$; then $s,t\in(1/3,2/3)$ and $s+t\in(2/3,4/3)$, so $\dist{s+t}<1/3$. Hence $M=1/3$.
+
+\emph{Theorem~\ref{thm:count}.} The sums and differences are $(1,1)$, $(1,-1)$, $(2,1)$, $(0,-1)$, $(1,2)$, $(-1,0)$ for the pairs $(1,2)^+,(1,2)^-,(1,3)^+,(1,3)^-,(2,3)^+,(2,3)^-$. Of these $(1,1)$, $(0,-1)$ and $(-1,0)$ have the kernel of one of the three forms; the remaining kernels $\ker(1,-1)$, $\ker(2,1)$, $\ker(1,2)$ are three distinct free repeat lines. So $L=3$, $d=3$ and $2n=6=L+d$.
+
+\emph{Theorem~\ref{thm:psi} at $N=3$.} The four points of $\mathbb P^1(\Z/3)$ are $(0,1),(1,0),(1,1),(1,2)$. The forms $(1,0),(0,1),(1,1)$ kill mod $3$ the points $(0,1),(1,0),(1,2)$ respectively, so $(1,1)$ is killed by none, and at $(1/3,1/3)$ every form value is a nonzero residue mod $3$ divided by $3$. Since $n=3<4=|R_3|$, Theorem~\ref{thm:psi}(b) gives $M\ge1/3$, in agreement.
+\end{example}
+
+\section{Root tori}\label{sec:root}
+
+This section proves Theorem~\ref{thm:root}. It uses only Section~\ref{sec:prelim}. Corollary~\ref{cor:prim}(ii) uses it for existence at $n=3,4,6$. We first record the lists and the identifications, then what the Lean kernel checks, then the cells of $A_2$ and $B_2$ by hand.
+
+\subsection{The lists and the identifications}
+Let $\Delta$ be an irreducible root system of rank $2$ with simple roots $\alpha_1,\alpha_2$ and highest root $\theta=m_1\alpha_1+m_2\alpha_2$. Its Coxeter number is $h=1+m_1+m_2$ and it has $h$ positive roots (in rank $r$ the number of positive roots is $rh/2$, so that the number of forms equals $h$ is a coincidence of rank $2$). The coefficient vectors $(c_1,c_2)$ of the positive roots $c_1\alpha_1+c_2\alpha_2$ are, by inspection:
+\[
+\begin{aligned}
+A_2&:\ (1,0),(0,1),(1,1); & \theta&=\alpha_1+\alpha_2,\ h=3;\\
+B_2&:\ (1,0),(0,1),(1,1),(1,2); & \theta&=\alpha_1+2\alpha_2,\ h=4;\\
+G_2&:\ (1,0),(0,1),(1,1),(2,1),(3,1),(3,2); & \theta&=3\alpha_1+2\alpha_2,\ h=6.
+\end{aligned}
+\]
+Cordella's torus $U_C$ is spanned over $\R$ by $(1,0,1,2,3,3)$ and $(0,1,1,1,1,2)$; its coordinate forms are $(1,0)$, $(0,1)$, $(1,1)$, $(2,1)$, $(3,1)$, $(3,2)$, which is $\mathcal F_{G_2}$. The torus $U^2$ of Jain and Kravitz is spanned by $(1,0,1,1)$ and $(1,1,0,2)$ and has forms $(1,1),(0,1),(1,0),(1,2)$: the same four forms as $\mathcal F_{B_2}$, each once, so the lists differ by a permutation of coordinates. (Jain and Kravitz note that after permuting coordinates the generators can be written $(1,0,1,1),(0,1,1,2)$, and Yi, Gill and Bu write the torus as $\{(X,Y,X+Y,X+2Y)\}$, which is $\mathcal F_{B_2}$ in the given order; Cordella notes that $U_C$ is the torus $U^7$ of \cite{JK}.) Since $M$ depends only on the multiset of forms, $M(U^2)=M(\mathcal F_{B_2})$ and $M(U_C)=M(\mathcal F_{G_2})$.
+
+\subsection{The proof checked by the kernel}
+The Lean proof uses no root-system notion. It reduces $s,t$ to $[0,1)$ and applies the floor-cell lemma: if $\dist z>c$ and $0\le z<N$, then $z\in(j+c,\,j+1-c)$ for some integer $0\le j<N$. For each torus one applies it to the forms in turn. The forms $s$ and $t$ have $N=1$ and contribute one cell each. For $A_2$ the third form $s+t$ has $N=2$, giving $2$ cells. For $B_2$ the forms $s+t$ and $s+2t$ have $N=2,3$, giving $2\cdot3=6$ cells. For $G_2$ the forms $s+t$, $2s+t$, $3s+t$, $3s+2t$ have $N=2,3,4,5$, giving $2\cdot3\cdot4\cdot5=120$ cells. Each cell is closed by linear arithmetic with $c=1/h$. The lower bound is the evaluation at $(1/h,1/h)$: if every coefficient sum $a+b$ lies in $[1,h-1]$ and some form has $a+b=1$, then $f(1/h,1/h)=1/h$.
+
+The three perturbed lists ($A_2$ with $(1,1)$ replaced by $(1,2)$, $B_2$ with $(1,2)$ replaced by $(1,3)$, $G_2$ with $(3,2)$ replaced by $(3,4)$) have the same number of forms and coprime entries, and the kernel checks that each has a point with $f>1/h$ ($(2/5,1/2)$, $(3/10,2/5)$, $(1/2,1/4)$ respectively). These three facts show that $M=1/h$ is not a consequence of $n=h$ and of coprime entries; it depends on the particular list. They are not a test of the proof of the upper bound, which was not run on the perturbed lists.
+
+\subsection{The cells of $A_2$ and $B_2$ by hand}
+Take $c=1/h$ and suppose all distances exceed $c$ with $x,y\in[0,1)$ the reduced coordinates. Then $x,y\in(c,1-c)$.
+
+\emph{$A_2$} ($c=1/3$, two cells). The cell of $z=x+y\in[0,2)$ is $(n+1/3,n+2/3)$ with $n\in\{0,1\}$. From $x,y\in(1/3,2/3)$ one has $x+y\in(2/3,4/3)$, which meets neither $(1/3,2/3)$ nor $(4/3,5/3)$.
+
+\emph{$B_2$} ($c=1/4$, six cells). Now $x,y\in(1/4,3/4)$. The cell of $x+y\in[0,2)$ is $(n_2+1/4,n_2+3/4)$, $n_2\in\{0,1\}$, and the cell of $x+2y\in[0,3)$ is $(n_3+1/4,n_3+3/4)$, $n_3\in\{0,1,2\}$. For each $n_2$ the two bounds of the cell of $x+y$ confine $x+2y=(x+y)+y$ to a window that meets none of the three cells of $x+2y$:
+\begin{center}
+\small
+\begin{tabular}{@{}cL{4.6cm}L{3.1cm}ccc@{}}
+\toprule
+$n_2$ & what $x+y\in(n_2+\tfrac14,n_2+\tfrac34)$ gives & window for $x+2y$ & $n_3=0$ & $n_3=1$ & $n_3=2$\\
+\midrule
+$0$ & $x+y>\tfrac12$ (as $x,y>\tfrac14$), so $x+2y>\tfrac34$; $x+y<\tfrac34$ and $x>\tfrac14$ give $y<\tfrac12$, so $x+2y<\tfrac54$ & $(\tfrac34,\tfrac54)$ & empty & empty & empty\\
+$1$ & $x+y>\tfrac54$ and $x,y<\tfrac34$ give $y>\tfrac12$, so $x+2y>\tfrac74$; $x+y<\tfrac32$, $y<\tfrac34$ give $x+2y<\tfrac94$ & $(\tfrac74,\tfrac94)$ & empty & empty & empty\\
+\bottomrule
+\end{tabular}
+\end{center}
+The cells of $x+2y$ are $(\tfrac14,\tfrac34)$, $(\tfrac54,\tfrac74)$, $(\tfrac94,\tfrac{11}4)$; both windows are disjoint from all three, so each of the six cells $(n_2,n_3)$ is empty.
+
+\emph{$G_2$} ($c=1/6$, $120$ cells). The same method applies to the four forms $x+y$, $2x+y$, $3x+y$, $3x+2y$ with ranges $2,3,4,5$; the number of cells is $2\cdot3\cdot4\cdot5=120$, each is refuted by the kernel, and we do not list them.
+
+\begin{remark}[Not formalised, not used]
+The cell check does not explain why the value is $1/h$, the reciprocal of the Coxeter number. This note gives no such explanation and does not use one, and the Lean files contain no root-system notion.
+\end{remark}
+
+\section{Counting repeat lines}\label{sec:count}
+
+This section proves Theorem~\ref{thm:count} and derives the count of Cordella's Lemma~3.4 from it. It is independent of the other sections; it uses the notation of Section~\ref{sec:prelim}. Nothing later uses it.
+
+\begin{lemma}[Sumset bound in an ordered group]\label{lem:ordered}
+Let $X,Y$ be finite nonempty subsets of $(\Q_{>0},\cdot)$. Then $|XY|\ge|X|+|Y|-1$.
+\end{lemma}
+\begin{proof}
+Write $X=\{x_1<\dots<x_k\}$, $Y=\{y_1<\dots<y_m\}$. Multiplication by a positive rational preserves the order, so $x_1y_1<x_1y_2<\dots<x_1y_m<x_2y_m<\dots<x_ky_m$ is a chain of $k+m-1$ distinct elements of $XY$.
+\end{proof}
+(In Lean this is Mathlib's Cauchy--Davenport inequality for linearly ordered cancellative semigroups, applied to logarithms.)
+
+\begin{proof}[Proof of Theorem~\ref{thm:count}]
+\emph{Outline.} Normalise so all first coordinates are positive and order the classes by slope; the sum of one form from each of two adjacent classes lies strictly between them and so is in no class; the number of such sums is controlled by Lemma~\ref{lem:ordered}; the $d$ adjacent pairs give disjoint arcs.
+
+Choose $x\in\Z^2$ with $\ell_r(x)\ne0$ for all $r$, change basis so that $x$ is the first basis vector, and replace $\ell_r$ by $-\ell_r$ where necessary; none of this changes the repeat lines or the classes, and the hypothesis $\ell_p\ne\pm\ell_q$ is preserved. (In Lean the change of basis is the shear $(a,b)\mapsto(a+Nb,b)$ for a suitable integer $N$.) Now every $\ell_r=(a_r,b_r)$ has $a_r>0$ and slope $b_r/a_r$. Let the classes have slopes $\sigma_1<\dots<\sigma_d$, and write each form of class $k$ as $\mu_pe_k$ with $e_k$ primitive with positive first entry and $\mu_p\in\Z_{>0}$; the $\mu_p$ in one class are pairwise distinct because $\ell_p\ne\pm\ell_q$. Let $m_k$ be the size of class $k$.
+
+\emph{Adjacent classes.} For $1\le k<d$, $p$ in class $k$ and $q$ in class $k+1$, the form $\ell_p+\ell_q=\mu_pe_k+\mu_qe_{k+1}$ has positive first entry and slope strictly between $\sigma_k$ and $\sigma_{k+1}$, so it is proportional to no $\ell_r$: its line is free. For the pair $(d,1)$ take $\ell_p-\ell_q$ with $p$ in class $d$ and $q$ in class $1$; it lies in the open cone spanned by $e_d$ and $-e_1$, whose opening is less than $\pi$, so its slope lies outside $[\sigma_1,\sigma_d]$ (possibly vertical), and again its line is free.
+
+\emph{Count within a pair.} Let $(k,l)$ be an adjacent pair and $A=\{\mu_p\}$, $B=\{\mu_q\}$ the coefficient sets. The line of $\mu_pe_k\pm\mu_qe_l$ is determined by the ratio $\rho=\mu_q/\mu_p$, and distinct ratios give distinct lines since $e_k,e_l$ are independent. The set of ratios is $BA^{-1}$, which has at least $|A|+|B|-1=m_k+m_l-1$ elements by Lemma~\ref{lem:ordered}.
+
+\emph{Disjointness.} The $d$ adjacent pairs give lines whose slopes lie in the $d$ pairwise disjoint arcs of $\mathbb P^1(\R)$ cut out by $\sigma_1,\dots,\sigma_d$ (the last arc being the complement of $[\sigma_1,\sigma_d]$). For $d=2$ the pairs $(1,2)$ and $(2,1)$ give the arcs $(\sigma_1,\sigma_2)$ and its complement. Summing over the $d$ cyclically adjacent pairs, the number of free repeat lines is at least $\sum_{k}(m_k+m_{k+1}-1)=2n-d$ (indices mod $d$). This is the claim $2n\le L+d$.
+
+\emph{Sharpness.} For $\mathcal F_{A_2}$ the free repeat lines are those of $(1,-1),(2,1),(1,2)$ (Example~\ref{ex:A2}), so $L=3=2n-d$.
+\end{proof}
+
+Since $d\le n$, the theorem gives $L\ge n$.
+
+\begin{remark}[Hypotheses]
+The hypothesis $\ell_p\ne\pm\ell_q$ cannot be dropped: with repeated forms the count fails already for $n=3$, for example $(0,1),(0,1),(1,-3)$ has $d=2$ and only two free repeat lines (slopes $-2$ and $-4$), while $2n-d=4$. The hypothesis $d\ge2$ is needed since all-proportional lists have no free repeat line. Forms in one class of different magnitude, such as $(1,0),(2,0),(3,0),(0,1)$, are allowed and counted in $n$ but not in $d$.
+\end{remark}
+
+\begin{remark}[Cordella's count]
+Cordella's Lemma~3.4 gives at least $2\max(m_k,m_l)-(d-2)$ free repeat lines for any two classes $k,l$, in his setting of five and six forms. Theorem~\ref{thm:count} implies this for every pair of classes: using $n\ge m_k+m_l+(d-2)$, the difference $(2n-d)-(2\max(m_k,m_l)-d+2)$ is at least $2\min(m_k,m_l)+2d-6\ge0$, with equality only for $d=2$ and a class of size $1$.
+\end{remark}
+
+\section{A totient condition}\label{sec:cryst}
+
+This section proves Theorem~\ref{thm:cryst}. It uses the torus function $f_{\mathcal F}$ of Section~\ref{sec:prelim} and is independent of Sections~\ref{sec:root} and \ref{sec:count}. The paragraph after the statement of Theorem~\ref{thm:cryst} in Section~\ref{sec:intro} says what the theorem adds to Corollary~\ref{cor:prim}(v). The name of the condition recalls the crystallographic restriction (the orders of rotations of a plane lattice are those $N$ with $\varphi(N)\le2$); we have no theorem connecting the two.
+
+\begin{lemma}\label{lem:pair}
+Let $N\ge3$, let $g_1=(a_r)_r$, $g_2=(b_r)_r$ be the two columns of the form matrix, and let $w\in\Z^n$ satisfy $w=s_0g_1+t_0g_2$ for some real $s_0,t_0$, with $0<|w_r|<N$ for all $r$. Let $u$ be an integer with $0<u<N$ coprime to $N$, and suppose $p$ (resp.\ $q$) is the only coordinate with $|w_r|=u$ (resp.\ $|w_r|=N-u$). If $f_{\mathcal F}\le1/N$ everywhere, then $a_pb_q-b_pa_q=0$, that is, $\ell_p$ and $\ell_q$ are proportional.
+\end{lemma}
+\begin{proof}
+Let $j$ be the inverse of $u$ mod $N$ and $y=(s,t)$ with $\ell_r(y)=jw_r/N$ for all $r$; this exists because $w$ lies in the span. For $r\notin\{p,q\}$, $|w_r|\notin\{u,N-u\}$, so $jw_r\not\equiv0,\pm1\pmod N$ and $\dist{jw_r/N}\ge2/N$. For $p$ and $q$ the residues are $\varepsilon_p=\pm1$ and $-\varepsilon_q=\mp1$ respectively, with $\varepsilon_p,\varepsilon_q$ the signs of $w_p,w_q$, so $\dist{\ell_p(y)}=\dist{\ell_q(y)}=1/N$. If $\ell_p,\ell_q$ were linearly independent there would be $z\in\R^2$ with $\varepsilon_p\ell_p(z)>0$ and $-\varepsilon_q\ell_q(z)>0$, and for small $\epsilon>0$ every coordinate at $y+\epsilon z$ would have distance $>1/N$ (the inactive ones have slack $1/N$), contradicting $f_{\mathcal F}\le1/N$.
+\end{proof}
+
+\begin{proof}[Proof of Theorem~\ref{thm:cryst}]
+Let $u$ be a unit mod $N$ with $0<u<N$. If $\kappa\notin\{u,N-u\}$, the heights $u$ and $N-u$ are each taken exactly once, and $u\ne N-u$ (otherwise $u\mid N$ and $u=1$, $N=2$), so Lemma~\ref{lem:pair} makes two distinct forms proportional, against the hypothesis. Hence every unit $u$ has $\kappa\in\{u,N-u\}$. Units come in pairs $\{u,N-u\}$ with $u\ne N-u$ since $N\ge3$, and $1$ and $N-1$ are units, so the set of units in $[1,N-1]$ is contained in $\{\kappa,N-\kappa\}$ and contains $\{1,N-1\}$. Thus $\varphi(N)=2$ and $\kappa\in\{1,N-1\}$.
+
+For the equivalence: for $N=3,4,6$ one has $\varphi(N)=2$. If $N\ge3$ and $N\notin\{3,4,6\}$ we exhibit a unit $u$ with $1<u<N-1$, so that $\varphi(N)\ge3$ (Lean: \lean{exists\_mid\_unit}). If $N\ge5$ is odd take $u=2$. If $N=4c+4$ with $c\ge1$ take $u=2c+1$, which is coprime to $N$ since $N=2u+2$ and $u$ is odd. If $N=4c+2$ with $c\ge2$ take $u=2c+3$; then $\gcd(u,N)=\gcd(2c+3,4)=1$ because $N-2u=-4$, and $u<N-1$ because $c>1$.
+\end{proof}
+
+\begin{remark}
+The hypotheses are weaker than criticality: $f_{\mathcal F}\le1/N$ everywhere, with the number of forms forced to be $N$ by the height condition. The vector $w$ is any integer vector in the real span, not necessarily a primitive vector of the lattice of the torus. For $\mathcal F_{G_2}$ with $w=(1,1,2,3,4,5)$, $N=6$, $\kappa=1$ all hypotheses hold, so the theorem is not vacuous.
+\end{remark}
+
+\section{Torsion points and primitive lists}\label{sec:psi}
+
+This section proves Theorem~\ref{thm:psi} and Corollary~\ref{cor:prim}. It needs the definitions of content, unimodular vectors and $R_N$ given before Theorem~\ref{thm:psi}; part (ii) of the corollary uses Theorem~\ref{thm:root} for existence. It is independent of Sections~\ref{sec:count} and \ref{sec:cryst}.
+
+For a form $\ell=(a,b)$ and $x=(x_1,x_2)\in\Z^2$ write $\ell(x)=ax_1+bx_2$, and say $\ell$ \emph{kills} $x$ mod $N$ if $N\mid\ell(x)$. For $x,x'\in\Z^2$ write $\det(x,x')=x_1x_2'-x_1'x_2$.
+
+\begin{lemma}\label{lem:det}
+Let $\ell=(a,b)$ have $\gcd(a,b,N)=1$. If $\ell$ kills $x=(x_1,x_2)$ and $x'=(x_1',x_2')$ mod $N$, then $N\mid x_1x_2'-x_1'x_2$.
+\end{lemma}
+\begin{proof}
+Put $D=x_1x_2'-x_1'x_2$. Then $aD=x_2'\ell(x)-x_2\ell(x')$ and $bD=x_1\ell(x')-x_1'\ell(x)$, so $N\mid aD$ and $N\mid bD$. Since $\gcd(a,b,N)=1$ there are integers $\rho_1,\rho_2,\rho_3$ with $\rho_1a+\rho_2b+\rho_3N=1$, and $D=\rho_1(aD)+\rho_2(bD)+\rho_3N\,D\equiv0\pmod N$.
+\end{proof}
+
+\begin{proposition}\label{prop:pigeon}
+Let $N\ge1$, let every form of $\mathcal F$ have content coprime to $N$, and let $S\subset\Z^2$ be a finite set with $N\nmid x_1x_2'-x_1'x_2$ for all $x\ne x'$ in $S$. If $n<|S|$, then $M(\mathcal F)\ge1/N$.
+\end{proposition}
+\begin{proof}
+By Lemma~\ref{lem:det} each form kills at most one element of $S$. With $n<|S|$ some $x\in S$ is killed by no form. At $(s,t)=x/N$ every value $\ell_r(x)/N$ has numerator not divisible by $N$, so $\dist{\ell_r(x/N)}\ge1/N$ for all $r$.
+\end{proof}
+
+\begin{proof}[Proof of Theorem~\ref{thm:psi}]
+\emph{(a), explicit family.} Let $S_N=\{(1,i):0\le i<N\}\cup\{(i,1):0\le i<N,\ \gcd(i,N)>1\}$. The determinants are $i'-i$ for two vectors of the first kind, $i-i'$ for two of the second kind, and $1-ii'$ for $(1,i')$ and $(i,1)$. The first two are nonzero mod $N$ for distinct elements, and the third is nonzero mod $N$ because $ii'$ shares a factor with $N$ while $1$ does not. So $|S_N|=N+(N-\varphi(N))=2N-\varphi(N)$ and Proposition~\ref{prop:pigeon} gives $M\ge1/N$ when $n<2N-\varphi(N)$.
+
+\emph{(b), projective line.} Let $x\ne x'$ be elements of $R_N$ and let $x'$ be the one that precedes $x$ lexicographically. Both are unimodular elements of the box, so by the definition of $R_N$ we have $N\nmid x_1'x_2-x_1x_2'$, that is, $N\nmid\det(x',x)$. Hence $R_N$ satisfies the hypothesis of Proposition~\ref{prop:pigeon}, which gives (b). This step does not use that the relation of Lemma~\ref{lem:classes} is transitive, and neither does the Lean proof.
+
+The values $|R_N|=\psi(N)$ for $N\le12$ and $N\in\{18,24,30\}$ are counts over the finite set $\{0,\dots,N-1\}^2$, checked by the Lean kernel. For all $N$ the identity is Lemma~\ref{lem:classes}(iii) below, a hand proof that is not formalised and is used only to name the cardinalities.
+\end{proof}
+
+\begin{lemma}[Classes of unimodular vectors]\label{lem:classes}
+Let $N\ge1$ and write $x\sim x'$ for unimodular $x,x'\in\Z^2$ if $N\mid\det(x,x')$. (i) The relation $\sim$ is an equivalence relation. (ii) Modulo $N$ each class has exactly $\varphi(N)$ elements, and each class meets $\{0,\dots,N-1\}^2$. (iii) $R_N$ has exactly one element in each class, and $|R_N|=\psi(N)=N\prod_{p\mid N}(1+1/p)$.
+\end{lemma}
+\begin{proof}
+(i) Reflexivity and symmetry are clear. Let $y$ be unimodular and fix integers $\alpha,\beta$ with $\alpha y_1+\beta y_2\equiv1\pmod N$. If $x\sim y$ put $\lambda=\alpha x_1+\beta x_2$. Using $x_2y_1\equiv x_1y_2$ we get $\lambda y_1\equiv\alpha x_1y_1+\beta x_1y_2=x_1(\alpha y_1+\beta y_2)\equiv x_1$, and using $x_1y_2\equiv x_2y_1$ we get $\lambda y_2\equiv\alpha x_2y_1+\beta x_2y_2\equiv x_2$. So $x\equiv\lambda y\pmod N$. If $x\sim y$ and $y\sim z$ then $x\equiv\lambda y$ and $z\equiv\mu y$ for some $\lambda,\mu$, so $\det(x,z)\equiv\lambda\mu\det(y,y)=0\pmod N$.
+
+(ii) Let $y$ be unimodular. By (i) every $x\sim y$ satisfies $x\equiv\lambda y$ for some $\lambda$, and $\lambda$ is a unit mod $N$, since a prime dividing $N$ and $\lambda$ would divide $x_1,x_2$ and $N$. Conversely $\lambda y$ is unimodular and $\sim y$ for every unit $\lambda$. The map $\lambda\mapsto\lambda y$ from the units mod $N$ is injective: $(\lambda-\lambda')y\equiv0$ gives $\lambda-\lambda'\equiv(\lambda-\lambda')(\alpha y_1+\beta y_2)\equiv0$. So a class has $\varphi(N)$ elements mod $N$. Reducing a vector mod $N$ into the box changes $\det$ by multiples of $N$ and keeps unimodularity, so each class meets the box.
+
+(iii) An element of the box belongs to $R_N$ exactly when it is unimodular and no lexicographically earlier unimodular element of the box is in its class, that is, when it is the lexicographically least element of its class in the box. By (ii) each class has exactly one such element. The number of classes is the number of unimodular vectors in $(\Z/N)^2$ divided by $\varphi(N)$. That number is $N^2\prod_{p\mid N}(1-p^{-2})$: it is multiplicative by the Chinese remainder theorem, and for $N=p^k$ it is $p^{2k}-p^{2k-2}$, the vectors not both divisible by $p$. Dividing by $\varphi(N)=N\prod_{p\mid N}(1-p^{-1})$ gives $N\prod_{p\mid N}(1+p^{-1})$.
+\end{proof}
+
+For prime powers $2N-\varphi(N)=\psi(N)$; for $N$ with two distinct prime factors $\psi(N)>2N-\varphi(N)$ (for $N=6$: $12>10$).
+
+\begin{proof}[Proof of Corollary~\ref{cor:prim}]
+All contents are $1$, so the hypothesis on contents holds for every $N$.
+
+(i) Let $n\ge5$, $n\ne6$. If $n-1$ is composite put $N=n-1$; the residues $0$ and a prime divisor of $N$ are non-units, so $\varphi(N)\le N-2$ and $2N-\varphi(N)\ge N+2=n+1>n$. If $n-1$ is prime then $n\ge8$ and $N=n-2$ is even and at least $6$; then $\varphi(N)\le N/2\le N-3$, so $2N-\varphi(N)\ge N+3=n+1>n$. In both cases $N<n$ and Theorem~\ref{thm:psi}(a) gives $M\ge1/N>1/n$.
+
+(ii) If $M=1/n$ then $n\ne1$ since $M\le1/2$, and by (i) $n\le4$ or $n=6$. Hence $n\in\{2,3,4,6\}$. Existence for $n=3,4,6$ is Theorem~\ref{thm:root}, since the lists $\mathcal F_{A_2},\mathcal F_{B_2},\mathcal F_{G_2}$ have content $1$ in every entry; for $n=2$ take $(1,0),(0,1)$, for which $f(1/2,1/2)=1/2$ and $M\le1/2$ always.
+
+(iii), (iv) $\psi(6)=12>n$ for $n\le11$; $\psi(10)=18$, $\psi(12)=24$, $\psi(18)=36$, $\psi(24)=48$, $\psi(30)=72$ cover the ranges stated, by Theorem~\ref{thm:psi}(b) with the checked cardinalities $|R_N|$ for $N=6,10,12$ (Lean: \lean{card\_projReps\_6}, \lean{card\_projReps\_10}, \lean{card\_projReps\_12}) and $N=18,24,30$ (\lean{card\_projReps\_18}, \lean{card\_projReps\_24}, \lean{card\_projReps\_30}). Everything in (iv) is therefore machine-checked, with no appeal to the hand proof of $|R_N|=\psi(N)$. For each $n$ with $12\le n\le71$ the level $N$ used is the least $N$ with $\psi(N)>n$, which is the smallest level for which Theorem~\ref{thm:psi}(b) applies, so (iv) is the sharpest bound that part (b) gives; a larger level such as $N=14$ or $N=21$ would give the weaker bounds $1/14$ or $1/21$.
+
+(v) If $5\le n$ and $n\ne6$, then $f\le1/n$ everywhere would give $M\le1/n$, against (i). So $n\in\{3,4,6\}$ and $\varphi(n)=2$.
+\end{proof}
+
+\begin{remark}[Primitive lists and Conjecture~\ref{conj:gap}]\label{rem:primconj}
+In both cases of the proof of (i) the level $N$ satisfies $N\le n-1$ and $n<2N-\varphi(N)$, so Theorem~\ref{thm:psi}(a) gives $M\ge1/N\ge1/(n-1)$. Thus for primitive lists with $n\ge5$, $n\ne6$ one has $M\ge1/(n-1)$, which is the inequality of Conjecture~\ref{conj:gap}, whatever the number of proportionality classes. A torus with $n\ge5$, $n\ne6$ forms and $M<1/(n-1)$ is therefore not primitive in any integer basis of its plane (the argument covers every such $n$, in particular $n=5$ and $n=7$, where Conjecture~\ref{conj:gap} has exceptional lists). In Lean the two ingredients are stated (\lean{exists\_level} and \lean{torusML\_ge\_inv\_of\_two\_mul\_sub\_totient}); the inequality $1/(n-1)\le M$ itself is not a stated theorem, the stated one being $1/n<M$.
+\end{remark}
+
+\begin{remark}[Necessity of the hypothesis]\label{rem:necessity}
+For $\mathcal F=((1,0),(2,0),(3,0),(4,0),(0,1))$ one has $n=5$ and $M=\ML(1,2,3,4)=1/5<1/4=1/N$ for the least $N$ with $\psi(N)>5$. (By hand: at $t=1/5$ the four distances are $1/5,2/5,2/5,1/5$. Conversely suppose all four distances at $t\in(0,1/2]$ exceed $1/5$; then $t\in(1/5,2/5)$ from $\dist t$ and $\dist{2t}$, then $3t\in(3/5,4/5)$ from $\dist{3t}$, so $t<4/15$ and $4t\in(4/5,16/15)$ has $\dist{4t}<1/5$, a contradiction; the case $t<0$ follows by $t\mapsto-t$. This value is classical and is not among the Lean statements of this note.) More generally, for any $N\ge2$ and a list with a form of content divisible by $N$, that form vanishes at every $N$-torsion point of the plane, and torsion counting at level $N$ gives nothing.
+\end{remark}
+
+\begin{remark}[Comparison with Theorem~\ref{thm:cryst}]
+Corollary~\ref{cor:prim}(v) obtains $\varphi(n)=2$ under primitivity and $f\le1/n$ with $n\ge3$ without any vector $w$ and without non-proportionality of the forms. The two theorems are logically independent: Theorem~\ref{thm:cryst} applies to tori with non-coprime entries that carry a vector $w$ of the stated shape; Theorem~\ref{thm:psi} applies to every list with coprime entries.
+\end{remark}
+
+\section{A conjecture and the computations behind it}\label{sec:conj}
+
+This section states one conjecture and says exactly how far computation reaches. It is not used elsewhere. Everything in it is either a conjecture or the result of an exact-integer computation; nothing in it is proved or formalised.
+
+\paragraph{How to read this section.} The computations search \emph{boxes}: a box is a finite set of forms (defined below), and a search considers every $n$-subset of the forms of a box that has $d\ge3$ proportionality classes. A \emph{survivor} is an $n$-subset that passes a necessary condition for $M<1/(n-1)$, the sieve described below; only survivors need an exact computation of $M$. The last column of each table counts the lists of the box with $d\ge3$ classes whose exact value of $M$ is below $1/(n-1)$; in the first table they can only be among the survivors, since the sieve discards only lists with $M\ge1/(n-1)$. A nonzero entry that is not an exceptional list would refute Conjecture~\ref{conj:gap}. The tables are evidence that no counterexample lies in the stated boxes and say nothing about lists outside them. They are not proofs, not Lean statements, and not counts of independent tori, because symmetric copies of one torus are counted separately. In the second table the entries for $n=4,\dots,7$ are the numbers of lists with $d\ge3$ classes and $M<1/(n-1)$ in the stated boxes; these lists exist, and each was identified as exceptional in the earlier searches, as the text below says; the table states how many there are, not that there are none.
+
+Two lists are \emph{equivalent} if one is obtained from the other by a permutation of the forms, changes of sign of single forms, and the substitution $\ell\mapsto\ell\circ P$ for some $P\in GL_2(\Z)$. Each of these operations leaves $M$ unchanged. Call a list \emph{exceptional} if it is equivalent to $\mathcal F_{A_2}$, $\mathcal F_{B_2}$ or $\mathcal F_{G_2}$ (with $n=3,4,6$), or to one of these three lists with one further nonzero form adjoined (with $n=4,5,7$).
+
+\begin{conjecture}\label{conj:gap}
+Let $\mathcal F$ have $n$ forms, pairwise distinct up to sign, in $d\ge3$ proportionality classes. If $\mathcal F$ is not exceptional, then $M(\mathcal F)\ge1/(n-1)$.
+\end{conjecture}
+
+\emph{Provenance and consequences.} The conjecture was formulated from exact computations in the boxes below and tested afterwards by an independent exact instrument. It contains the classification of critical tori with $d\ge3$ classes; for five forms this classification is in \cite[Thm.~3.8]{Cordella} and \cite[Thm.~11.5]{YGB}, and the case of $\mathcal F_{A_2}$ plus one form is \cite[Lemma~9.4(iii), Thm.~9.6]{YGB}. The conjecture is consistent with these results and covers no case beyond them that we can prove, except that Remark~\ref{rem:primconj} proves the inequality for primitive lists with $n\ge5$, $n\ne6$.
+
+\emph{What the computation tests.} In a box (defined next) the program finds every list with $d\ge3$ classes and $M<1/(n-1)$ and decides $M$ exactly for the lists that survive the sieve described below, a necessary condition for $M<1/(n-1)$. A counterexample to the conjecture would be a list found with $M<1/(n-1)$ that is not exceptional. For $n=8,9,10$ the boxes of the first table contain no list with $M<1/(n-1)$ at all, so the exception clause is not used there. For $n=4,\dots,7$ the second table gives the number of lists with $M<1/(n-1)$ in smaller boxes; that every one of them is exceptional was established in those earlier searches by identifying each with a root list or a root list plus one form; it was not recomputed for this note.
+
+\emph{Boxes.} A \emph{box} is specified by an entry bound $B$ and a list of contents $C$: it consists of the forms $c\,\ell'$ with $\ell'$ primitive, entries at most $B$ in absolute value and taken up to sign, and $c\in C$; in the tables $C$ is written $1..7$ for the contents $1,2,\dots,7$. A search is exhaustive within a box: all $n$-subsets of its forms, with $d\ge3$. The $8$ substitutions $\ell\mapsto\ell\circ P$ with $P$ a signed permutation matrix (swap the two coordinates, change the sign of one) map every box to itself and leave $M$ and $d$ unchanged. They are not quotiented: every number below counts the lists of one orbit separately, so the number of orbits is at least one eighth of the number listed.
+
+\emph{The sieve.} Put $L=n-1$. The sieve is a necessary condition for $M<1/L$ and has two stages. In stage 1 the items are the cyclic subgroups of order $N$ of $\R^2/\Z^2$ for $N=2,\dots,L$; an item is killed if some form of the list vanishes on it, that is, $N\mid\ell(x)$ for an integer vector $x$ that generates the subgroup mod $N$. In stage 2 the items are the points $x$ of order $N$ of $\R^2/\Z^2$ for $L<N\le24$; an item is killed if $\dist{\ell(x)}<1/L$ for some form $\ell$ of the list. (This second use of ``killed'' is the weaker one of this section only; in Section~\ref{sec:psi} a form kills a vector when it vanishes mod $N$.) A list with $M<1/L$ must kill every item. The reason is that an unkilled item gives a point at which every form has distance at least $1/L$ from $\Z$: for a stage 2 item this is the definition; for a stage 1 item and a generator $x/N$ of the subgroup, each value $\ell(x/N)$ lies in $\frac1N\Z$ and not in $\Z$, so its distance from $\Z$ is at least $1/N\ge1/L$. Such a list has $M\ge1/L$ and is discarded without computing $M$. The survivors are the $n$-subsets that kill every item of both stages; the sieve proves nothing about a survivor, and $M$ is computed exactly for each.
+
+\emph{Ground covered.} Exact decision procedures of two different designs (a maximum over all vertices of the line arrangement $\{2\ell_r\in\Z\}\cup\{\ell_p\pm\ell_q\in\Z\}$, and a maximum over points where three forms are equidistant from $\Z$) agreed on $700$ random form sets and on fifteen known values, and a planted wrong threshold made the search find sub-threshold lists. The searches that ran to completion are below; symmetric copies are counted, as said under ``Boxes'', so the listed numbers are not numbers of independent tori.
+\begin{center}
+\small
+\begin{tabular}{@{}cllr@{}}
+\toprule
+$n$ & box $(B;\,C)$ & survivors checked exactly & below $1/(n-1)$\\
+\midrule
+$8$ & $(2;\,1..7)$ & $29$ & $0$\\
+$8$ & $(2;\,1..14)$ & $9{,}840$ & $0$\\
+$8$ & $(3;\,1..8)$ & $1{,}629$ & $0$\\
+$9$ & $(2;\,1..12)$ & $88$ & $0$\\
+$10$ & $(2;\,1..12)$ & $1{,}054$ & $0$\\
+\bottomrule
+\end{tabular}
+\end{center}
+``Survivors'' are the $n$-subsets that pass the two-stage sieve above (with $L=n-1$, items of order up to $24$); each survivor was then decided exactly, and the last column counts those with $M<1/(n-1)$. Smaller boxes were searched earlier; the following table gives the number of lists with $d\ge3$ and $M<1/(n-1)$ in each, with the same box definition and the same symmetric copies counted. All of them are exceptional; these counts come from the earlier searches and were not recomputed for this note.
+\begin{center}
+\small
+\begin{tabular}{@{}cll@{}}
+\toprule
+$n$ & boxes $(B;\,C)$, in this order & lists below $1/(n-1)$\\
+\midrule
+$4$ & $(2;\,1..6)$, $(3;\,1..4)$ & $701$, $1820$\\
+$5$ & $(2;\,1..6)$, $(3;\,1..4)$ & $88$, $552$\\
+$6$ & $(2;\,1..6)$, $(2;\,1..8)$, $(3;\,1..3)$ & $16$, $20$, $26$\\
+$7$ & $(2;\,1..6)$, $(3;\,1..3)$ & $22$, $0$\\
+$8$ & $(3;\,1..2)$ & $0$\\
+$9$ & $(2;\,1..4)$, $(3;\,1..2)$ & $0$, $0$\\
+\bottomrule
+\end{tabular}
+\end{center}
+The bound $1/(n-1)$ is attained: for $n=8$, a class of six proportional forms plus two forms of content $7$ gives $M=1/7$ exactly, in $20$ of the $29$ survivors of one $n=8$ box, so the inequality cannot be made strict.
+
+\emph{Not covered (none of it is evidence).} Exhaustive boxes for $n=11$ and $n=12$ were started and stopped without finishing, so $n\ge11$ is covered only by random mixes ($7$ runs of $3\cdot10^6$ samples with $n=8,\dots,12$, entry bound $3$ or $4$, no counterexample). Contents above $14$ at $n=8$ and above $12$ at $n=9,10$ are not covered. Entry bounds $B\ge3$ are covered only at $n=8$ (contents up to $8$) and in the smaller boxes above. For entry bound $1$ with contents up to $30$ at $n=9$, only part $0$ of $16$ finished: its $43{,}747$ survivors all have $M\ge1/8$, and the other fifteen parts were stopped for time; $n=10$ with entry bound $1$ was not started. These are lower bounds over boxes, not a landscape: absence of a counterexample in a box says nothing outside it.
+
+\section{What is formalised}\label{sec:lean}
+
+This section lists, statement by statement, what is verified in Lean~4, what the formal statement says exactly, which parts of the note are hand-written and not Lean statements, and how to rebuild the Lean files. It is a map from the numbered statements of Sections~\ref{sec:intro}--\ref{sec:psi} to declarations; it proves nothing new. The statements of this note rest on it.
+
+All statements of Sections~\ref{sec:root}--\ref{sec:psi} in the form listed are proved in Lean~4 (toolchain \texttt{v4.30.0}; Mathlib at the revision pinned in the repository) in five leaf modules of the repository, of $395$, $902$, $442$, $459$ and $55$ lines. Loneliness is $\ML(v)=\sup_t\min_i\dist{v_it}$ as in Section~\ref{sec:prelim}, and \lean{torusML} $=M$; for $g_2=0$ one has \lean{torusML}$\,v\,0=\ML(v)$ (\lean{torusML\_zero\_snd}). The modules were built one at a time, with no \texttt{sorry}, no \texttt{native\_decide} and no added axiom; \texttt{\#print axioms} returned exactly \texttt{propext}, \texttt{Classical.choice}, \texttt{Quot.sound} for each declaration in the table. The axiom check also contains a control declaration whose proof is the placeholder \texttt{sorry}; its \texttt{\#print axioms} output lists \texttt{sorryAx}, which shows that the check reports an unfinished proof when there is one, so that the absence of \texttt{sorryAx} from the other outputs is informative.
+
+\paragraph{How the five modules depend on each other.} \lean{ObsRootTorus} proves Theorem~\ref{thm:root}. It imports the repository module \lean{MaxLoneliness}, which defines the gap function \lean{torusGap} and \lean{torusML}, and it is the base of the other modules that speak about tori. \lean{ObsConeLemma} (Theorem~\ref{thm:count} and Lemma~\ref{lem:ordered}) imports only Mathlib, among others its Cauchy--Davenport inequality, and is independent of the other four. \lean{ObsCrystallographic} (Lemma~\ref{lem:pair} and Theorem~\ref{thm:cryst}) and \lean{ObsPsiBound} (Lemma~\ref{lem:det}, Proposition~\ref{prop:pigeon}, Theorem~\ref{thm:psi} and Corollary~\ref{cor:prim}, except part (iv)) each import \lean{ObsRootTorus}, and through it the gap function; the first also uses the list $\mathcal F_{G_2}$ for its instance, the second the three root lists in the existence statements of Corollary~\ref{cor:prim}(ii). \lean{ObsPsiTable} imports \lean{ObsPsiBound} and adds the cardinalities for $N=18,24,30$ and Corollary~\ref{cor:prim}(iv). As a diagram: \lean{MaxLoneliness} $\to$ \lean{ObsRootTorus} $\to$ \lean{ObsCrystallographic}; \lean{ObsRootTorus} $\to$ \lean{ObsPsiBound} $\to$ \lean{ObsPsiTable}; \lean{ObsConeLemma} stands alone.
+
+\begin{center}
+\small
+\begin{tabular}{@{}L{2.8cm}L{6.7cm}L{3.2cm}@{}}
+\toprule
+Statement & Lean declaration & Module\\
+\midrule
+Thm.~\ref{thm:root}, values & \lean{torusML\_A2}, \lean{torusML\_B2}, \lean{torusML\_G2}, \lean{torusGap\_diag} & ObsRootTorus\\
+Thm.~\ref{thm:root}, cells & \lean{A2\_upper}, \lean{B2\_upper}, \lean{G2\_upper} (floor-cell lemma \lean{nd\_gt\_cell}; $2$, $6$, $120$ cases by \lean{interval\_cases}) & ObsRootTorus\\
+Thm.~\ref{thm:root}, $U^2$, $U_C$ & \lean{torusML\_JK\_U2}, \lean{torusML\_Cordella\_UC}, \lean{JK\_U2\_forms\_eq\_B2}, \lean{Cordella\_UC\_forms\_eq\_G2}, \lean{CORg\_eq\_G2} & ObsRootTorus\\
+Perturbed lists (Section~\ref{sec:root}) & \lean{control\_A2'}, \lean{control\_B2'}, \lean{control\_G2'} & ObsRootTorus\\
+Thm.~\ref{thm:count} & \lean{cone\_lemma} (statement $2n\le L+d$), \lean{A2\_free\_card}, \lean{A2\_slope\_card} & ObsConeLemma\\
+Lemma~\ref{lem:ordered} & \lean{acl}, \lean{sum\_count}, \lean{dif\_count} & ObsConeLemma\\
+Lemma~\ref{lem:pair} & \lean{crystallographic\_pair} & ObsCrystallographic\\
+Thm.~\ref{thm:cryst} & \lean{crystallographic\_lemma}, \lean{totient\_eq\_two\_iff}, \lean{exists\_mid\_unit}, \lean{G2\_instance} & ObsCrystallographic\\
+Lemma~\ref{lem:det}, Prop.~\ref{prop:pigeon} & \lean{det\_dvd\_of\_both\_kill}, \lean{exists\_unkilled}, \lean{torusML\_ge\_inv\_of\_indep} & ObsPsiBound\\
+Thm.~\ref{thm:psi}(a), (b); distinctness of $R_N$ & \lean{torusML\_ge\_inv\_of\_two\_mul\_sub\_totient}, \lean{torusML\_ge\_inv\_of\_projReps}, \lean{projReps\_indep} ($R_N$ is \lean{projReps N}) & ObsPsiBound\\
+Cor.~\ref{cor:prim}(i) & \lean{exists\_level}, \lean{torusML\_gt\_inv\_of\_primitive} & ObsPsiBound\\
+Cor.~\ref{cor:prim}(ii) & \lean{primitive\_critical\_card} (only if; includes the exclusion of $n=1$ through \lean{torusML\_le\_half}), \lean{torusML\_A2/B2/G2\_primitive} (existence for $n=3,4,6$) & ObsPsiBound\\
+Cor.~\ref{cor:prim}(iii) & \lean{torusML\_ge\_one\_sixth\_of\_primitive} & ObsPsiBound\\
+Cor.~\ref{cor:prim}(iv) & \lean{torusML\_ge\_primitive\_table}, \lean{torusML\_ge\_of\_primitive\_card} & ObsPsiTable\\
+$|R_N|$, numerical instances & \lean{card\_projReps\_2}, \dots, \lean{card\_projReps\_12} (cardinalities $3,4,6,6,12,8,12,12,18,12,24$); \lean{card\_projReps\_eq\_psiDed\_le\_12} (equality of the cardinality with the squarefree-divisor sum \lean{psiDed} for every $N$ from $1$ to $12$, so also $N=1$); \lean{card\_projReps\_18/24/30}, \lean{psiDed\_table} ($36,48,72$) & ObsPsiBound, ObsPsiTable\\
+Cor.~\ref{cor:prim}(v) & \lean{primitive\_totient\_two} & ObsPsiBound\\
+\bottomrule
+\end{tabular}
+\end{center}
+Here \lean{psiDed} $N$ is $\sum_{d\mid N,\ d\text{ squarefree}}N/d$, which equals $N\prod_{p\mid N}(1+1/p)$; this identity is elementary and is not a Lean statement, and no Lean proof of this note needs it.
+
+\subsection*{The declarations in words}
+One sentence for each declaration of the table. Here $f$ is \lean{torusGap} and $M$ is \lean{torusML}; ``list'' means a list of integer forms.
+{\small
+\begin{itemize}[leftmargin=1.5em,itemsep=0pt]
+\item \emph{ObsRootTorus.} \lean{torusGap\_diag}: if every coefficient sum lies in $[1,N-1]$ and one form has sum $1$, then $f(1/N,1/N)=1/N$. \lean{nd\_gt\_cell}: if $0\le z<N$ and $\dist z>c$, then $z\in(j+c,j+1-c)$ for some integer $0\le j<N$. \lean{A2\_upper}, \lean{B2\_upper}, \lean{G2\_upper}: $f$ never exceeds $1/3$, $1/4$, $1/6$ for the three lists. \lean{torusML\_A2}, \lean{torusML\_B2}, \lean{torusML\_G2}: the suprema are exactly $1/3$, $1/4$, $1/6$. \lean{torusML\_JK\_U2}, \lean{torusML\_Cordella\_UC}: the same for the spanning vectors of $U^2$ and $U_C$ as written in \cite{JK,Cordella}. \lean{JK\_U2\_forms\_eq\_B2}, \lean{Cordella\_UC\_forms\_eq\_G2}, \lean{CORg\_eq\_G2}: the set of forms of $U^2$ is that of $\mathcal F_{B_2}$, and the form list of $U_C$ is literally $\mathcal F_{G_2}$. \lean{control\_A2'}, \lean{control\_B2'}, \lean{control\_G2'}: for each perturbed list $f$ exceeds $1/h$ at the stated point. \lean{torusML\_zero\_snd}: if all second entries vanish, $M=\ML$.
+\item \emph{ObsConeLemma.} \lean{acl}: for finite sets $A,B$ of positive rationals and any labelling of the pairs whose label fixes $\log b-\log a$, the number of labels is at least $|A|+|B|-1$ (Lemma~\ref{lem:ordered}). \lean{sum\_count}, \lean{dif\_count}: the same for the labels of sum lines and of difference lines. \lean{lineOf\_eq\_iff}: two nonzero forms have the same slope label exactly when their $2\times2$ determinant vanishes. \lean{cone\_lemma}: for forms pairwise distinct up to sign with $d\ge2$ slope classes, $2n\le L+d$ with $L$ the number of free repeat lines. \lean{A2\_free\_card}, \lean{A2\_slope\_card}: the list $\mathcal F_{A_2}$ has exactly $3$ free repeat lines and $3$ slope classes.
+\item \emph{ObsCrystallographic.} \lean{crystallographic\_pair}: under the hypotheses of Lemma~\ref{lem:pair} the two forms at the heights $u$ and $N-u$ have determinant $0$. \lean{crystallographic\_lemma}: under the hypotheses of Theorem~\ref{thm:cryst}, $\varphi(N)=2$ and $\kappa\in\{1,N-1\}$. \lean{exists\_mid\_unit}: for $N\ge3$ outside $\{3,4,6\}$ there is a unit $u$ mod $N$ with $2\le u\le N-2$. \lean{totient\_eq\_two\_iff}: for $N\ge3$, $\varphi(N)=2$ exactly for $N\in\{3,4,6\}$. \lean{G2\_instance}: the hypotheses of the theorem hold for $\mathcal F_{G_2}$ with $w=(1,1,2,3,4,5)$, $N=6$, $\kappa=1$.
+\item \emph{ObsPsiBound.} \lean{det\_dvd\_of\_both\_kill}: a form with content coprime to $N$ that vanishes mod $N$ at two vectors forces $N$ to divide their determinant. \lean{exists\_unkilled}: if more vectors than forms have pairwise determinants not divisible by $N$, one of them is killed by no form. \lean{torusML\_ge\_inv\_of\_indep}: in that situation $M\ge1/N$. \lean{torusML\_ge\_inv\_of\_two\_mul\_sub\_totient}: if all contents are coprime to $N$ and $n<2N-\varphi(N)$, then $M\ge1/N$. \lean{projReps\_indep}: two distinct elements of $R_N$ have determinant not divisible by $N$. \lean{torusML\_ge\_inv\_of\_projReps}: if all contents are coprime to $N$ and $n<|R_N|$, then $M\ge1/N$. \lean{exists\_level}: for $n\ge5$, $n\ne6$ there is $N$ with $0<N<n<2N-\varphi(N)$. \lean{torusML\_gt\_inv\_of\_primitive}: a primitive list with $n\ge5$, $n\ne6$ has $M>1/n$. \lean{torusML\_le\_half}: $M\le1/2$ for every list. \lean{primitive\_critical\_card}: a primitive list with $M=1/n$ has $n\in\{2,3,4,6\}$. \lean{torusML\_A2/B2/G2\_primitive}: each root list is primitive and has $M=1/h$. \lean{torusML\_ge\_one\_sixth\_of\_primitive}: a primitive list with $n\le11$ has $M\ge1/6$. \lean{primitive\_totient\_two}: a primitive list with $n\ge3$ and $f\le1/n$ everywhere has $\varphi(n)=2$. \lean{card\_projReps\_2}, \dots, \lean{card\_projReps\_12}: $|R_N|$ is $3,4,6,6,12,8,12,12,18,12,24$ for $N=2,\dots,12$. \lean{card\_projReps\_eq\_psiDed\_le\_12}: for $1\le N\le12$, $|R_N|$ equals the squarefree-divisor sum \lean{psiDed}.
+\item \emph{ObsPsiTable.} \lean{card\_projReps\_18}, \lean{card\_projReps\_24}, \lean{card\_projReps\_30}, \lean{psiDed\_table}: $|R_N|=36,48,72$ for $N=18,24,30$, equal to \lean{psiDed}. \lean{torusML\_ge\_of\_primitive\_card}: a primitive list with $n<|R_N|$ has $M\ge1/N$. \lean{torusML\_ge\_primitive\_table}: the five bounds of Corollary~\ref{cor:prim}(iv).
+\end{itemize}}
+
+\subsection*{Statement fidelity}
+Every Lean statement of the five modules was compared with the mathematical statements above by reading, and no mismatch was found; this is not a human expert's review. The following points limit what the Lean theorems say, and the text above respects them.
+\begin{itemize}[leftmargin=1.5em]
+\item The names $A_2,B_2,G_2$ are given to three explicit integer lists; that these are positive-root lists and the Coxeter-number statement are not formalised, and no root-system notion occurs in the Lean files.
+\item In Theorem~\ref{thm:count} the Lean statement is $2n\le L+d$ for forms indexed by a finite type, pairwise distinct up to sign, with $d\ge2$ slope classes. A line is represented by its slope class; the equivalence with equality of kernels is the lemma \lean{lineOf\_eq\_iff}, and equality of kernels as real subspaces is not stated. The step $d\le n$ giving $L\ge n$ is not a Lean statement.
+\item In Theorem~\ref{thm:cryst} the repeated height $\kappa$ is a natural number; ``non-proportional'' is the nonvanishing of the $2\times2$ determinant of every pair of distinct forms; the hypothesis on $f_{\mathcal F}$ is the inequality $\le1/N$ at all points. The invariance of the hypotheses under a change of basis of the plane (Section~\ref{sec:prelim}) is not a Lean statement.
+\item In Theorem~\ref{thm:psi} the set $R_N$ is the Lean definition \lean{projReps N}: unimodular pairs in $[0,N)^2$ that are lexicographically least in their class, meaning that no earlier unimodular pair has $N$ dividing the determinant. The explicit family of $2N-\varphi(N)$ vectors gives part (a) for every $N$. The identity $|R_N|=\psi(N)$ for general $N$ (Lemma~\ref{lem:classes}: transitivity of $\sim$, classes of size $\varphi(N)$, count of unimodular vectors) is not formalised; Lean checks the cardinalities of $R_N$ for $N=2,\dots,12$ and $N=18,24,30$, and for $N\le12$ their equality with \lean{psiDed}. The Lean proof of part (b) uses only the pairwise property \lean{projReps\_indep} and the cardinality, not transitivity.
+\item Corollary~\ref{cor:prim}(ii) is proved only in the direction ``$M=1/n$ implies $n\in\{2,3,4,6\}$'' as one theorem; existence at $n=3,4,6$ is three further theorems; existence at $n=2$ is not formalised.
+\item The conclusion $1/(n-1)\le M$ for primitive lists with $n\ge5$, $n\ne6$ (Remark~\ref{rem:primconj}) follows from the two stated declarations \lean{exists\_level} and \lean{torusML\_ge\_inv\_of\_two\_mul\_sub\_totient} but is not itself a stated theorem; the stated theorem is $1/n<M$.
+\item Hand-written, not Lean statements: Example~\ref{ex:A2}; the cell tables for $A_2$ and $B_2$ in Section~\ref{sec:root}; Lemma~\ref{lem:classes}; Remark~\ref{rem:necessity} (the value $\ML(1,2,3,4)=1/5$); Remark~\ref{rem:primconj}.
+\item The Lonely Runner floor $\ML\ge1/(k+1)$ is not stated in any of the five modules, and neither is Conjecture~\ref{conj:gap}.
+\end{itemize}
+
+\subsection*{Reproducibility}
+{\sloppy The five modules are leaf modules of the accompanying Lean library: no other module imports them, and the library has no top-level module, so a bare \texttt{lake build} builds nothing. Each must be built by name, with its imports already built, one at a time: first the modules that \lean{ObsRootTorus} imports (among them \lean{LRSpectrumFull.MaxLoneliness}), then \lean{LRSpectrumFull.ObsRootTorus}, \lean{LRSpectrumFull.ObsConeLemma}, \lean{LRSpectrumFull.ObsCrystallographic}, \lean{LRSpectrumFull.ObsPsiBound}, \lean{LRSpectrumFull.ObsPsiTable}, each with \texttt{lake build}. A reader who wants the statements checked should build these modules by name and run \texttt{\#print axioms} on the declarations of the table. The computations of Section~\ref{sec:conj} are exact-integer programs and are not Lean-verified; they are not part of the archive that accompanies this note. Docstrings and comments of four of the modules were edited for publication after they were built; declarations and proofs are unchanged.\par}
+
+\begin{thebibliography}{99}
+\bibitem{Wills} J.~M. Wills, Zwei S\"atze \"uber inhomogene diophantische Approximation von Irrationalzahlen, Monatsh. Math. 71 (1967), 263--269. (Bibliographic data as printed in the reference list of \cite{Cordella}.)
+\bibitem{Cusick} T.~W. Cusick, View-obstruction problems in $n$-dimensional geometry, J. Combin. Theory Ser. A 16 (1974), 1--11. (Data as printed in \cite{Cordella}.)
+\bibitem{GK} V.~Giri and N.~Kravitz, The structure of Lonely Runner spectra, arXiv:2304.01462 (v4, 30 March 2025); Math. Proc. Cambridge Philos. Soc. 180 (2026), 343--361. (Journal data as printed in \cite{Cordella}.)
+\bibitem{JK} V.~Jain and N.~Kravitz, Relative Lonely Runner spectra, arXiv:2411.12684 (v2, 9 December 2024); Combinatorial Theory 6 (2026), Paper~1 (journal data as printed in \cite{YGB}). Section and theorem numbers cited in this note are those of arXiv v2.
+\bibitem{Cordella} F.~Cordella, Odd denominators in the Lonely Runner spectrum for six speeds, arXiv:2609.03444 (v2, 8 September 2026). Unrefereed as far as the record shows.
+\bibitem{YGB} H.~Yi, K.~Gill and B.~Bu, Four runners that are barely lonely, arXiv:2610.40694 (v1, 28 October 2026; no later version seen on 17 November 2026). Unrefereed as far as the record shows.
+\bibitem{Kravitz} N.~Kravitz, Barely lonely runners and very lonely runners: a refined approach to the Lonely Runner Problem, Comb. Theory 1 (2021), \#17; arXiv:1912.06034. (Journal data as printed in \cite{Cordella}.)
+\bibitem{FS} H.~T. Fan and A.~Sun, Amending the Lonely Runner Spectrum Conjecture, Electron. J. Combin. 33 (2026), \#P1.38, doi:10.37236/13840; arXiv:2306.10417.
+\end{thebibliography}
+
+\end{document}

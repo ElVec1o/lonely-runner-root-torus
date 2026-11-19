@@ -1,0 +1,10 @@
+.lake/
+build/
+target/
+work/
+repro/logs/
+*.synctex.gz
+*.aux
+*.log
+*.out
+.DS_Store

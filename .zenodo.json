@@ -1,0 +1,27 @@
+{
+  "title": "Critical two-dimensional subtori of the torus: root systems, repeat lines, and torsion points",
+  "upload_type": "software",
+  "version": "1.0.0",
+  "publication_date": "2026-11-19",
+  "creators": [
+    {
+      "name": "Bonfioli, Vico",
+      "affiliation": "Independent"
+    }
+  ],
+  "license": "cc-by-4.0",
+  "keywords": [
+    "lonely runner conjecture",
+    "view obstruction",
+    "Lean 4",
+    "formal verification",
+    "root systems",
+    "Coxeter number"
+  ],
+  "related_identifiers": [
+    {"identifier": "arXiv:2411.12684", "relation": "cites", "scheme": "arxiv", "resource_type": "publication-article"},
+    {"identifier": "arXiv:2609.03444", "relation": "cites", "scheme": "arxiv", "resource_type": "publication-article"},
+    {"identifier": "arXiv:2610.40694", "relation": "cites", "scheme": "arxiv", "resource_type": "publication-preprint"}
+  ],
+  "description": "A short note, with Lean 4 verification, on the maximal distance M from the coordinate walls of a two-dimensional subtorus of the n-torus given by integer linear forms in two variables. (1) The coefficient lists of the positive roots of A2, B2, G2 have M = 1/3, 1/4, 1/6, that is 1/h for the Coxeter number h; the tori U^2 of Jain and Kravitz and U_C of Cordella are the tori of B2 and G2; the upper bound is a finite case check (2, 6 and 120 cases) closed by the Lean kernel. (2) If n forms are pairwise distinct up to sign and fall into d >= 2 proportionality classes, at least 2n - d lines of the plane carry two coordinates that agree up to sign while no coordinate vanishes. (3) A condition on the absolute values of the coordinates of an integer vector in the plane forces phi(N) = 2. (4) If every form has content coprime to N and n is smaller than the number of points of the projective line over Z/N, then M >= 1/N; consequently a primitive list with n >= 5, n != 6 has M > 1/n, and M = 1/n for a primitive list forces n in {2,3,4,6}. One conjecture, supported by exact computation in bounded boxes, is stated and not proved. Novelty is partial: the values for B2, A2 and G2 are in the literature (Yi, Gill and Bu, arXiv:2610.40694; Cordella, arXiv:2609.03444); what is added is the Lean verification, the root-system dictionary, the sharp count 2n - d for every n, and the torsion and totient bounds. The note has no bearing on the lonely runner conjecture itself. The archive contains the note (19 pages), the five Lean modules and the two support modules they import, and scripts that build them one at a time and print the axioms. The Lean modules, the proofs and the first draft of the note were produced by an AI system (Claude, Anthropic); the questions, the research directions and the decision to formalize these statements came from Vico Bonfioli. No human referee has checked the proofs. The note has not been peer reviewed."
+}

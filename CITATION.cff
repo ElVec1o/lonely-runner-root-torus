@@ -1,0 +1,34 @@
+cff-version: 1.2.0
+message: "If you use this software or its results, please cite it as below."
+title: "Critical two-dimensional subtori of the torus: root systems, repeat lines, and torsion points"
+abstract: >-
+  A short note with Lean 4 verification on the maximal distance M from the coordinate walls of a two-dimensional
+  subtorus of the n-torus given by integer linear forms in two variables. The coefficient lists of the positive
+  roots of A2, B2, G2 have M = 1/3, 1/4, 1/6 (the tori U^2 of Jain and Kravitz and U_C of Cordella are the tori of
+  B2 and G2; the upper bound is a finite case check closed by the Lean kernel). If n forms are pairwise distinct up
+  to sign and fall into d >= 2 proportionality classes, at least 2n - d lines of the plane carry two coordinates
+  that agree up to sign while no coordinate vanishes. A condition on the absolute values of the coordinates of an
+  integer vector in the plane forces phi(N) = 2. If every form has content coprime to N and n is smaller than the
+  number of points of the projective line over Z/N, then M >= 1/N; consequently primitive lists with n >= 5,
+  n != 6 have M > 1/n, and M = 1/n for a primitive list forces n in {2,3,4,6}. One conjecture, supported by exact
+  computation in bounded boxes, is stated and not proved. Novelty is partial: the values for B2, A2 and G2 are in
+  the literature (Yi, Gill and Bu, arXiv:2610.40694; Cordella, arXiv:2609.03444); what is added is the Lean
+  verification, the root-system dictionary, the sharp count 2n - d, and the torsion and totient bounds. The note
+  has no bearing on the lonely runner conjecture itself. The Lean modules, the proofs and the first draft were
+  produced by an AI system (Claude, Anthropic); the questions, directions and the decision to formalize these
+  statements came from Vico Bonfioli. The note has not been peer reviewed.
+authors:
+  - family-names: Bonfioli
+    given-names: Vico
+license: CC-BY-4.0
+version: 1.0.0
+repository-code: "https://github.com/ElVec1o/lonely-runner-root-torus"
+type: software
+date-released: 2026-11-19
+keywords:
+  - lonely runner conjecture
+  - Lean 4
+  - formal verification
+  - root systems
+  - Coxeter number
+  - view obstruction

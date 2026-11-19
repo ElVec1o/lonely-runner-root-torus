@@ -1,0 +1,12 @@
+name = "LRSpectrumFull"
+# No default target: a bare `lake build` would start one lean worker per core (up to 9 GB each).
+# Build modules one at a time with repro/build.sh.
+defaultTargets = []
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "v4.30.0"
+
+[[lean_lib]]
+name = "LRSpectrumFull"
